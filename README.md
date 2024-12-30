@@ -1,4 +1,4 @@
-# images.cv - Labeled Image Datasets for AI/ML  
+# images.cv - Labeled Image Datasets for AI/ML/CV  
 A repository of labeled image datasets hosted on [images.cv](https://images.cv).  
 
 ## Features:
