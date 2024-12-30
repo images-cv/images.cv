@@ -13,6 +13,3 @@ A repository of labeled image datasets hosted on [images.cv](https://images.cv).
 
 ## Contribute
 Feel free to submit suggestions or feature requests by opening an issue or pull request.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
