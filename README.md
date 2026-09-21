@@ -30,9 +30,9 @@ from.
 ## 3. Explore datasets
 
 Browse and search the catalog at [images.cv](https://images.cv). Every
-dataset has a short **slug** (its key, e.g. `pug`, `buoy`) visible in its
-URL — that's what you'll use to download it via the notebook or the Python
-example.
+dataset has a short **slug** (its key, e.g. `pug`, `golden_pheasant`)
+visible in its URL — that's what you'll use to download it via the
+notebook or the Python example.
 
 ## 4. Community platform
 
@@ -86,8 +86,18 @@ license (see [§12](#12-license-status)) covers any dataset's contents.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/images-cv/images.cv/blob/main/notebooks/images_cv_starter.ipynb)
 
-The starter notebook downloads a dataset by slug, verifies and safely
-extracts it, explores its metadata/images/class distribution, and
+Open any dataset page on images.cv and select **Open in Colab**. The
+dataset name is copied automatically. Paste it into the notebook's
+`DATASET_SLUG` field, then run the notebook cells in order.
+
+If you open the notebook directly (via the badge above, without coming
+from a dataset page first), browse the [images.cv](https://images.cv)
+catalog, copy a dataset's slug, and paste it into `DATASET_SLUG` yourself
+— the notebook ships with a placeholder value and will not run against a
+real dataset until you do this.
+
+The starter notebook downloads the chosen dataset by slug, verifies and
+safely extracts it, explores its metadata/images/class distribution, and
 visualizes bounding boxes/masks/COCO/YOLO annotations when a package
 actually includes them. See
 [`docs/notebook-usage.md`](docs/notebook-usage.md) for a full walkthrough,

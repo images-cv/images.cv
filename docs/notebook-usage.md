@@ -2,22 +2,38 @@
 
 ## Opening it
 
-Click **Open in Colab** at the top of the [README](../README.md), or open
-directly:
+There are two ways to get here:
+
+**From a dataset page (recommended).** Browse [images.cv](https://images.cv),
+open a dataset, and click **Open in Colab** on the dataset page. The
+dataset's slug is copied to your clipboard automatically, and this
+notebook opens. Paste the copied slug into the `DATASET_SLUG` field
+(section 1) and run the notebook.
+
+**Opening the notebook directly.** Click **Open in Colab** at the top of
+the [README](../README.md), or open directly:
 
 https://colab.research.google.com/github/images-cv/images.cv/blob/main/notebooks/images_cv_starter.ipynb
 
-This runs the notebook straight from GitHub — no download or account setup
-needed. Sign in with a Google account only if you want to save your own
-copy (`File > Save a copy in Drive`).
+Nothing is copied for you in this path. Browse the
+[images.cv](https://images.cv) dataset catalog, copy a dataset's slug
+(visible in its URL), and paste it into `DATASET_SLUG` yourself. The
+notebook ships with a placeholder value in `DATASET_SLUG` and will refuse
+to run against a real dataset until you replace it.
+
+Either way, this runs the notebook straight from GitHub — no download or
+account setup needed. Sign in with a Google account only if you want to
+save your own copy (`File > Save a copy in Drive`).
 
 ## Running it
 
-1. Edit the form fields in the **Dataset configuration** cell (the only
-   cell most people need to touch): set `DATASET_SLUG` to a dataset key
-   from [images.cv](https://images.cv) (visible in the dataset's URL),
+1. In the **Dataset configuration** cell (section 1, the only cell most
+   people need to touch), replace the `DATASET_SLUG` placeholder with the
+   dataset slug you copied or found on [images.cv](https://images.cv),
    pick image size/color/split options, and leave the optional sections
    (`RUN_PYTORCH_EXAMPLE`, `MOUNT_GOOGLE_DRIVE`) off unless you want them.
+   The cell raises a clear error and makes no network request if
+   `DATASET_SLUG` is still the placeholder, empty, or whitespace-only.
 2. `Runtime > Run all`, or step through with Shift+Enter. Cells must run
    top to bottom — later cells depend on variables set earlier.
 3. Watch the **Download dataset** cell — it submits a packaging job and
@@ -85,6 +101,7 @@ what's currently included vs. planned as a future enrichment format.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
+| `ValueError: No dataset selected...` | `DATASET_SLUG` is still the placeholder, empty, or whitespace-only | Paste a real dataset slug from images.cv (via **Open in Colab** or the catalog) into `DATASET_SLUG` and re-run from section 1 |
 | A cell raises "returned non-JSON... Cloudflare" | The API's Cloudflare protection blocked an unusual request | Re-run the cell; if it persists, you may be on a flagged network |
 | "Timed out waiting for the package to be built" | Large or first-time category taking longer than the timeout | Increase `DOWNLOAD_TIMEOUT_SECONDS` in the config cell and re-run from the Download section |
 | Metadata shows 0 images | `DATASET_SLUG` doesn't match a real dataset key | Double-check the slug from the dataset's URL on images.cv |
