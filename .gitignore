@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Downloaded datasets / notebook working output -- never commit real data
+datasets/
+*.zip
+notebook-output/
+images_cv_workspace/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment / secrets -- never commit these
+.env
+.env.*
+*.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
