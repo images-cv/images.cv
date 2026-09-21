@@ -11,7 +11,7 @@ See ../docs/dataset-package-format.md for the verified request/response
 schemas and package layout this mirrors.
 
 Examples:
-    python download_dataset.py --dataset buoy --output ./datasets/buoy
+    python download_dataset.py --dataset pug --output ./datasets/pug
     python download_dataset.py --dataset pug --metadata-only
     python download_dataset.py --dataset pug --output ./datasets/pug --force
 """
@@ -249,7 +249,7 @@ def inspect_package(dataset_dir: Path) -> dict[str, bool]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                       formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--dataset", required=True, help="Dataset slug/key, e.g. 'pug' or 'buoy'")
+    parser.add_argument("--dataset", required=True, help="Dataset slug/key, e.g. 'pug' (see images.cv for the full catalog)")
     parser.add_argument("--output", default=None,
                          help="Output directory (default: ./datasets/<dataset>)")
     parser.add_argument("--size", default="size_128", choices=sorted(VALID_SIZES),

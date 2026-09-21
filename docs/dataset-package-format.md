@@ -44,7 +44,7 @@ file. See `docs/notebook-usage.md` for the exact symptom.
 
 ## 2. Dataset identifiers ("slugs")
 
-A dataset is identified by its category **key**, e.g. `"pug"`, `"buoy"`,
+A dataset is identified by its category **key**, e.g. `"pug"`,
 `"golden_pheasant"`. Keys are opaque lowercase, underscore-separated
 strings — there is no formally documented pattern, treat them as arbitrary
 strings. You can discover keys via `POST /search_datasets` with
