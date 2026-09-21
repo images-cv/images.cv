@@ -1,0 +1,139 @@
+name: Validate notebook and docs
+
+# Static validation only -- this deliberately never downloads a dataset or
+# depends on production GCS/API availability. It checks the notebook is
+# valid, output-free, and that no secrets/signed URLs slipped into a commit.
+
+on:
+  pull_request:
+    paths:
+      - "notebooks/**"
+      - "docs/**"
+      - "examples/**"
+      - "README.md"
+      - "requirements.txt"
+      - ".github/workflows/validate-notebook.yml"
+  push:
+    branches: [main]
+    paths:
+      - "notebooks/**"
+      - "docs/**"
+      - "examples/**"
+      - "README.md"
+      - "requirements.txt"
+      - ".github/workflows/validate-notebook.yml"
+
+# This workflow only reads the checked-out repo and runs local Python checks
+# -- it never needs to write to the repo, issues, PRs, or packages.
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Only validation tooling -- deliberately not the full requirements.txt,
+      # since that describes the notebook's runtime deps, not CI's.
+      - name: Install validation dependencies
+        run: pip install --quiet nbformat PyYAML
+
+      - name: Compile examples/download_dataset.py
+        run: python -m py_compile examples/download_dataset.py
+
+      - name: Validate notebook + repo checks
+        run: |
+          python - <<'PY'
+          import ast
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          import nbformat
+
+          repo_root = Path(".")
+          failures = []
+
+          # --- 1. Notebook nbformat validity ---------------------------------------
+          nb_path = repo_root / "notebooks" / "images_cv_starter.ipynb"
+          if not nb_path.exists():
+              failures.append(f"missing notebook: {nb_path}")
+          else:
+              nb = nbformat.read(nb_path, as_version=4)
+              try:
+                  nbformat.validate(nb)
+              except nbformat.ValidationError as exc:
+                  failures.append(f"notebook failed nbformat validation: {exc}")
+
+              # --- 2. Outputs cleared, no stale execution counts --------------------
+              for i, cell in enumerate(nb.cells):
+                  if cell.cell_type != "code":
+                      continue
+                  if cell.get("outputs"):
+                      failures.append(f"notebook cell {i} has uncleared outputs")
+                  if cell.get("execution_count") is not None:
+                      failures.append(f"notebook cell {i} has a stale execution_count")
+                  try:
+                      ast.parse(cell.source)
+                  except SyntaxError as exc:
+                      failures.append(f"notebook cell {i} has a Python syntax error: {exc}")
+
+          # --- 3. README internal links resolve -------------------------------------
+          readme_path = repo_root / "README.md"
+          if readme_path.exists():
+              text = readme_path.read_text(encoding="utf-8")
+              for match in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", text):
+                  target = match.group(1).split("#", 1)[0].strip()
+                  if not target or target.startswith(("http://", "https://", "mailto:")):
+                      continue
+                  if not (repo_root / target).exists():
+                      failures.append(f"README.md links to missing local file: {target}")
+
+          # --- 4. No obvious credentials / signed URLs committed ---------------------
+          secret_patterns = [
+              (r"AKIA[0-9A-Z]{16}", "AWS access key"),
+              (r"-----BEGIN [A-Z ]*PRIVATE KEY-----", "embedded private key"),
+              (r"X-Goog-Signature=", "GCS signed URL"),
+              (r"X-Amz-Signature=", "S3-style signed URL"),
+              (r"GoogleAccessId=", "GCS signed URL"),
+              (r"AIza[0-9A-Za-z_-]{35}", "Google API key"),
+          ]
+          scan_dirs = ["notebooks", "docs", "examples", "README.md", "requirements.txt"]
+          scan_files = []
+          for entry in scan_dirs:
+              path = repo_root / entry
+              if path.is_dir():
+                  scan_files.extend(p for p in path.rglob("*") if p.is_file())
+              elif path.is_file():
+                  scan_files.append(path)
+
+          for path in scan_files:
+              try:
+                  content = path.read_text(encoding="utf-8")
+              except (UnicodeDecodeError, OSError):
+                  continue
+              for pattern, label in secret_patterns:
+                  if re.search(pattern, content):
+                      failures.append(f"{path}: looks like it contains a {label}")
+
+          # --- 5. examples/download_dataset.py sanity --------------------------------
+          example_path = repo_root / "examples" / "download_dataset.py"
+          if example_path.exists():
+              source = example_path.read_text(encoding="utf-8")
+              if "api.images.cv" not in source:
+                  failures.append("examples/download_dataset.py no longer references the real API host")
+
+          if failures:
+              print("VALIDATION FAILED:\n")
+              for f in failures:
+                  print(f" - {f}")
+              sys.exit(1)
+
+          print("All notebook/docs/example validation checks passed.")
+          PY
